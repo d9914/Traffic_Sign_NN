@@ -60,19 +60,18 @@ def load_data(data_dir):
     """
     images = []
     labels = []
-    # loop through each folder
-    for category in range(NUM_CATEGORIES):
-        category_dir = os.path.join(data_dir, str(category))
-        #files in folder
-        for filename in os.listdir(category_dir):
-            image_path = os.path.join(category_dir, filename)
 
-            image = cv2.imread(image_path)
-            image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
-            images.append(image)
-            labels.append(category)
-
-    return (images, labels)
+    # iterate through data set directories
+    for directory in os.listdir(data_dir):
+        # iterate through single image files
+        print(f"Started loading files from {directory} directory")
+        for file in os.listdir(os.path.join(data_dir, directory)):
+            image = cv2.imread(os.path.join(data_dir, directory, file))
+            resized = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(resized)
+            labels.append(int(directory))
+        print(f"Ended loading files from {directory} directory")
+    return images, labels
 
 
 def get_model():
@@ -84,6 +83,13 @@ def get_model():
     model = tf.keras.models.Sequential([
 
         # Convolutional layer. Learn 32 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
         tf.keras.layers.Conv2D(
             32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
